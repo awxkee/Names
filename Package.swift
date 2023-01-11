@@ -6,21 +6,24 @@ import PackageDescription
 let package = Package(
     name: "NamesGenerator",
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "NamesGenerator",
             targets: ["NamesGenerator"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", "5.0.0"..<"6.0.0")
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "NamesGenerator",
-            dependencies: []),
+            dependencies: [.product(name: "Yams", package: "Yams")],
+            resources: [.copy("Resources/adjectives.yml"),
+                        .copy("Resources/animals.yml"),
+                        .copy("Resources/colors.yml"),
+                        .copy("Resources/star_wars.yml"),
+                        .copy("Resources/stars.yml"),
+                        .copy("Resources/westeros.yml"),
+                        .copy("Resources/witcher.yml")]),
         .testTarget(
             name: "NamesGeneratorTests",
             dependencies: ["NamesGenerator"]),
