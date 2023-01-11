@@ -13,33 +13,36 @@ public struct NamesGenerator {
     private static var savedPrefixes: [[String]] = []
     private static var savedWords: [[String]] = []
     private static let lock = NSLock()
+    private static let initializationLock = NSLock()
     private static var isInitialized = false
 
-    static func register() throws {
-        guard !NamesGenerator.isInitialized else {
-            return
-        }
-        let prefixes = try ["adjectives", "colors"].map { name in
-            if let url = Bundle.module.url(forResource: name, withExtension: "yml") {
-                return url
-            } else {
-                throw PrepareResourcesError(name: name)
+    public static func initialize() throws {
+        try initializationLock.withLock({
+            guard !NamesGenerator.isInitialized else {
+                return
             }
-        }.map { url in
-            try YAMLDecoder().decode(NamesDictionary.self, from: try Data(contentsOf: url, options: .mappedIfSafe))
-        }.map { $0.items }
-        let words = try ["animals", "star_wars", "stars", "witcher", "westeros"].map { name in
-            if let url = Bundle.module.url(forResource: name, withExtension: "yml") {
-                return url
-            } else {
-                throw PrepareResourcesError(name: name)
-            }
-        }.map { url in
-            try YAMLDecoder().decode(NamesDictionary.self, from: try Data(contentsOf: url, options: .mappedIfSafe))
-        }.map { $0.items }
-        NamesGenerator.savedWords = words
-        NamesGenerator.savedPrefixes = prefixes
-        NamesGenerator.isInitialized = true
+            let prefixes = try ["adjectives", "colors"].map { name in
+                if let url = Bundle.module.url(forResource: name, withExtension: "yml") {
+                    return url
+                } else {
+                    throw PrepareResourcesError(name: name)
+                }
+            }.map { url in
+                try YAMLDecoder().decode(NamesDictionary.self, from: try Data(contentsOf: url, options: .mappedIfSafe))
+            }.map { $0.items }
+            let words = try ["animals", "star_wars", "stars", "witcher", "westeros"].map { name in
+                if let url = Bundle.module.url(forResource: name, withExtension: "yml") {
+                    return url
+                } else {
+                    throw PrepareResourcesError(name: name)
+                }
+            }.map { url in
+                try YAMLDecoder().decode(NamesDictionary.self, from: try Data(contentsOf: url, options: .mappedIfSafe))
+            }.map { $0.items }
+            NamesGenerator.savedWords = words
+            NamesGenerator.savedPrefixes = prefixes
+            NamesGenerator.isInitialized = true
+        })
     }
 
     public struct PrepareResourcesError: LocalizedError {
@@ -57,7 +60,7 @@ public struct NamesGenerator {
 
     public static func generate() throws -> String {
         try lock.withLock {
-            try register()
+            try initialize()
             if NamesGenerator.savedPrefixes.isEmpty || NamesGenerator.savedWords.isEmpty {
                 throw InitializationError()
             }

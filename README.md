@@ -10,5 +10,10 @@ import NamesGenerator
 let name: String = try NamesGenerator.generate()
 ```
 
+Dictionary is initialized lazily, if you need to load before use
+```swift
+try NamesGenerator.initialize()
+```
+
 To use it add package in SPM
 https://github.com/awxkee/Names.git
