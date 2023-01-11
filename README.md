@@ -9,3 +9,6 @@ import NamesGenerator
 
 let name: String = try NamesGenerator.generate()
 ```
+
+To use it add package in SPM
+https://github.com/awxkee/Names.git
